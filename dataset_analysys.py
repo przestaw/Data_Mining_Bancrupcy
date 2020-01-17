@@ -25,6 +25,16 @@ def generate_sparsity_matrix(dataframes_arg, print=False):
         plt.savefig('year' + str(i) + '.png')
 
 
+def check_data_imbalance(dataframes_arg):
+    for i in range(len(dataframes_arg)):
+        print('Dataset: ' + str(i + 1) + 'year')
+        print(dataframes_arg[i].groupby('Y').size())
+        minority_percent = (dataframes_arg[i]['Y'].tolist().count(1) / len(dataframes_arg[i]['Y'].tolist())) * 100
+        print('Minority (label 1) percentage: ' + str(minority_percent) + '%')
+        print('-' * 64)
+
+
 def analyse_dataset(dataframes_arg):
-    drop_nan_rows(dataframes_arg, True)
-    generate_sparsity_matrix(dataframes_arg, True)
+    # drop_nan_rows(dataframes_arg, True)
+    # generate_sparsity_matrix(dataframes_arg, True)
+    check_data_imbalance(dataframes_arg)

@@ -7,8 +7,8 @@ import impyute as impy
 from sklearn.impute import SimpleImputer
 
 
+# Construct an imputer with strategy as 'mean', to mean-impute along the columns
 def perf_mean_imput(dfs_arg):
-    # Construct an imputer with strategy as 'mean', to mean-impute along the columns
     imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
     mean_data = [pd.DataFrame(imputer.fit_transform(df)) for df in dfs_arg]
     for i in range(len(dfs_arg)):
@@ -61,5 +61,7 @@ def perf_imputs(dfs_arg):
     imputed_dfs_dict['k-NN'] = knn_imputed_dfs
     imputed_dfs_dict['EM'] = em_imputed_dfs
     # imputed_dfs_dict['MICE'] = mice_imputed_dfs
+
+    # TODO : Oversampling -> SMOTE
 
     return imputed_dfs_dict
