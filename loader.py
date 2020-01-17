@@ -23,7 +23,7 @@ def loader_bancrupcy(N=5):
         iter.columns = cols
 
     # Convert data to float
-    for i in range(5):
+    for i in range(N):
         index = 1
         while index <= 63:  # 63 columns
             col_name = dataframes[i].columns[index]
