@@ -1,10 +1,10 @@
-from collections import OrderedDict
 import pandas as pd
 import numpy as np
 # Library to perform Expectation-Maximization (EM), k-NN and MICE imputations
 import impyute as impy
 # To perf mean imputation
 from sklearn.impute import SimpleImputer
+from collections import OrderedDict
 
 
 # Construct an imputer with strategy as 'mean', to mean-impute along the columns
@@ -61,7 +61,5 @@ def perf_imputs(dfs_arg):
     imputed_dfs_dict['k-NN'] = knn_imputed_dfs
     imputed_dfs_dict['EM'] = em_imputed_dfs
     # imputed_dfs_dict['MICE'] = mice_imputed_dfs
-
-    # TODO : Oversampling -> SMOTE
 
     return imputed_dfs_dict
