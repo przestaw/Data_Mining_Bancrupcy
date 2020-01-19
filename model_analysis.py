@@ -13,56 +13,27 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve
 from sklearn.metrics import precision_recall_curve
+import matplotlib.pyplot as plt
 
 from oversample import split_dfs_labels
 
+class ModelsDict:
+    models = OrderedDict()
 
-def prepare_models():
-    models_dictionary = OrderedDict()
+    def add_rf(self, _n_estimators, _criterion) :
+        cl = RandomForestClassifier(n_estimators=_n_estimators, criterion=_criterion)
+        key = 'RF/'+str(_n_estimators)+'/'+_criterion
+        self.models[key] = cl
 
-    # Random Forest Classifiers
-    rf_50_trees_gini = RandomForestClassifier(n_estimators=50, criterion='gini')
-    rf_10_trees_gini = RandomForestClassifier(n_estimators=10, criterion='gini')
-    rf_25_trees_gini = RandomForestClassifier(n_estimators=25, criterion='gini')
-
-    rf_50_trees_entropy = RandomForestClassifier(n_estimators=50, criterion='entropy')
-    rf_10_trees_entropy = RandomForestClassifier(n_estimators=10, criterion='entropy')
-    rf_25_trees_entropy = RandomForestClassifier(n_estimators=25, criterion='entropy')
-
-    # add to models dictionary
-    models_dictionary['Radom Forrest 50 trees gini impurity'] = rf_50_trees_gini
-    models_dictionary['Radom Forrest 10 trees gini impurity'] = rf_10_trees_gini
-    models_dictionary['Radom Forrest 25 trees gini impurity'] = rf_25_trees_gini
-
-    models_dictionary['Radom Forrest 50 trees information gain'] = rf_50_trees_entropy
-    models_dictionary['Radom Forrest 10 trees information gain'] = rf_10_trees_entropy
-    models_dictionary['Radom Forrest 25 trees information gain'] = rf_25_trees_entropy
-
-    # K-Neighbors classifiers
-    kn_5_uniform_ball_tree = KNeighborsClassifier(n_neighbors=5, weights='uniform', algorithm='ball_tree')
-    kn_5_distance_ball_tree = KNeighborsClassifier(n_neighbors=5, weights='distance', algorithm='ball_tree')
-
-    kn_5_uniform_kd_tree = KNeighborsClassifier(n_neighbors=5, weights='uniform', algorithm='kd_tree')
-    kn_5_distance_kd_tree = KNeighborsClassifier(n_neighbors=5, weights='distance', algorithm='kd_tree')
-
-    kn_5_uniform_brute = KNeighborsClassifier(n_neighbors=5, weights='uniform', algorithm='brute')
-    kn_5_distance_brute = KNeighborsClassifier(n_neighbors=5, weights='distance', algorithm='brute')
-
-    models_dictionary['K nearest neighbors 5 nearest uniform BallTree'] = kn_5_uniform_ball_tree
-    models_dictionary['K nearest neighbors 5 nearest distance BallTree'] = kn_5_distance_ball_tree
-
-    models_dictionary['K nearest neighbors 5 nearest uniform KDTree'] = kn_5_uniform_kd_tree
-    models_dictionary['K nearest neighbors 5 nearest distance KDTree'] = kn_5_distance_kd_tree
-
-    models_dictionary['K nearest neighbors 5 nearest uniform BruteForce'] = kn_5_uniform_brute
-    models_dictionary['K nearest neighbors 5 nearest distance BruteForce'] = kn_5_distance_brute
-
-    return models_dictionary
+    def add_knn(self, _n_neighbors, _weights, _algorithm):
+        cl = KNeighborsClassifier(n_neighbors=_n_neighbors, weights=_weights, algorithm=_algorithm)
+        key = 'KNN/' + str(_n_neighbors) + '/' + _weights + '/' + _algorithm
+        self.models[key] = cl
 
 
 def prepare_kfold_cv_data(k, x, y, verbose=False):
     x = x.values
-    #y = y.values
+    y = y.values
     kf = KFold(n_splits=k, shuffle=False)
     x_train = []
     y_train = []
@@ -78,7 +49,8 @@ def prepare_kfold_cv_data(k, x, y, verbose=False):
 
 
 # perform data modeling
-def perform_data_modeling(_models_, _imputers_, verbose=True, k_folds=5):
+def perform_data_modeling(_models_dict, _imputers_, verbose=True, k_folds=5):
+    _models_ = _models_dict.models
     model_results = OrderedDict()
 
     # Iterate over the models
@@ -100,7 +72,7 @@ def perform_data_modeling(_models_, _imputers_, verbose=True, k_folds=5):
             # Iterate over dataframe_list individually
             for df_index in range(len(dataframes_list)):
                 if verbose:
-                    print('\t\tDataset: ' + '\033[1m' + str(df_index + 1) + 'year' + '\033[0m')
+                    print('\t\tDataset: ' + '\033[1m' + str(df_index + 1) + ' year' + '\033[0m')
 
                 # Calling the 'prepare_kfold_cv_data' returns lists of features and labels
                 # for train and test sets respectively.
@@ -164,7 +136,7 @@ def perform_data_modeling(_models_, _imputers_, verbose=True, k_folds=5):
                     print('\t\t\tPrecision:', metrics_results['Precisions'])
                     print('\t\t\tRecall:', metrics_results['Recalls'])
 
-                year_results[str(df_index + 1) + 'year'] = metrics_results
+                year_results[df_index + 1] = metrics_results
 
             imputer_results[imputer_name] = year_results
 
@@ -173,14 +145,69 @@ def perform_data_modeling(_models_, _imputers_, verbose=True, k_folds=5):
     return model_results
 
 
+def plot_results(results, _title):
+    for model_name, imputers in results.items():
+        for imputer_name, years in imputers.items():
+            x = []
+            y = []
+            for year, metrics in years.items():
+                x.append(year)
+                y.append(metrics['Accuracy']*100)
+            plt.plot(x, y, label=model_name + " " + imputer_name, marker='.')
+    plt.xlabel("Year")
+    plt.title(_title)
+    plt.ylabel("Accuracy [%]")
+    plt.legend()
+    plt.show()
+
+
 def prepare_and_do_modeling(df_dict):
-    # Prepare models
-    models = prepare_models()
-
+    # KNN testing
+    # test how many neighbours to consider as nearest
+    models = ModelsDict()
+    models.add_knn(1, 'uniform', 'kd_tree')
+    models.add_knn(10, 'uniform', 'kd_tree')
+    models.add_knn(25, 'uniform', 'kd_tree')
     results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    plot_results(results, "Varied number of nearest neighbours")
 
-    # TODO
-    # do ranking,
-    # prepare for summary plot
+    # check for distance-based weights
+    models.models.clear()
+    models.add_knn(1, 'distance', 'kd_tree')
+    models.add_knn(10, 'distance', 'kd_tree')
+    models.add_knn(25, 'distance', 'kd_tree')
+    results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    plot_results(results, "Varied number of nearest neighbours (distance weight)")
 
-    return None  # TODO
+    # check which distance gives better results for n_neighbors = 1
+    models.models.clear()
+    models.add_knn(1, 'uniform', 'kd_tree')
+    models.add_knn(1, 'distance', 'kd_tree')
+    results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    plot_results(results, "Comparing uniform vs distance neighbour weights")
+
+
+    # Random Forest Testing
+    # test amount of trees with gini
+    models.models.clear()
+    models.add_rf(1, 'gini')
+    models.add_rf(10, 'gini')
+    models.add_rf(100, 'gini')
+    results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    plot_results(results, "Varied amount of trees [gini]")
+
+    # test the same with entropy
+    models.models.clear()
+    models.add_rf(1, 'entropy')
+    models.add_rf(10, 'entropy')
+    models.add_rf(100, 'entropy')
+    results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    plot_results(results, "Varied amount of trees [entropy]")
+    
+    # entropy vs gini with 100 trees
+    models.models.clear()
+    models.add_rf(100, 'gini')
+    models.add_rf(100, 'entropy')
+    results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    plot_results(results, "entropy vs gini")
+    return None
