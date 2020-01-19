@@ -39,14 +39,14 @@ def prepare_models():
     models_dictionary['Radom Forrest 25 trees information gain'] = rf_25_trees_entropy
 
     # K-Neighbors classifiers
-    kn_5_uniform_ball_tree = KNeighborsClassifier(nearest_neighbors=5, weights='uniform', algorithm='ball_tree')
-    kn_5_distance_ball_tree = KNeighborsClassifier(nearest_neighbors=5, weights='distance', algorithm='ball_tree')
+    kn_5_uniform_ball_tree = KNeighborsClassifier(n_neighbors=5, weights='uniform', algorithm='ball_tree')
+    kn_5_distance_ball_tree = KNeighborsClassifier(n_neighbors=5, weights='distance', algorithm='ball_tree')
 
-    kn_5_uniform_kd_tree = KNeighborsClassifier(nearest_neighbors=5, weights='uniform', algorithm='kd_tree')
-    kn_5_distance_kd_tree = KNeighborsClassifier(nearest_neighbors=5, weights='distance', algorithm='kd_tree')
+    kn_5_uniform_kd_tree = KNeighborsClassifier(n_neighbors=5, weights='uniform', algorithm='kd_tree')
+    kn_5_distance_kd_tree = KNeighborsClassifier(n_neighbors=5, weights='distance', algorithm='kd_tree')
 
-    kn_5_uniform_brute = KNeighborsClassifier(nearest_neighbors=5, weights='uniform', algorithm='brute')
-    kn_5_distance_brute = KNeighborsClassifier(nearest_neighbors=5, weights='distance', algorithm='brute')
+    kn_5_uniform_brute = KNeighborsClassifier(n_neighbors=5, weights='uniform', algorithm='brute')
+    kn_5_distance_brute = KNeighborsClassifier(n_neighbors=5, weights='distance', algorithm='brute')
 
     models_dictionary['K nearest neighbors 5 nearest uniform BallTree'] = kn_5_uniform_ball_tree
     models_dictionary['K nearest neighbors 5 nearest distance BallTree'] = kn_5_distance_ball_tree
@@ -61,9 +61,9 @@ def prepare_models():
 
 
 def prepare_kfold_cv_data(k, x, y, verbose=False):
-    y = x.values
-    y = y.values
-    kf = KFold(n_splits=k, shuffle=False, random_state=42)
+    x = x.values
+    #y = y.values
+    kf = KFold(n_splits=k, shuffle=False)
     x_train = []
     y_train = []
     x_test = []
@@ -78,7 +78,7 @@ def prepare_kfold_cv_data(k, x, y, verbose=False):
 
 
 # perform data modeling
-def perform_data_modeling(_models_, _imputers_, verbose=False, k_folds=5):
+def perform_data_modeling(_models_, _imputers_, verbose=True, k_folds=5):
     model_results = OrderedDict()
 
     # Iterate over the models
@@ -136,7 +136,7 @@ def perform_data_modeling(_models_, _imputers_, verbose=False, k_folds=5):
                     accuracy_list[k_index] = _accuracy_
 
                     # code for calculating recall
-                    _recalls_ = recall_score(y_test, y_test_predicted, average=None)
+                    _recalls_ = recall_score(y_test, y_test_predicted, average=None, zero_division=1)
                     recall_list[k_index] = _recalls_
 
                     # code for calculating precision
