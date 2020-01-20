@@ -17,9 +17,9 @@ def perf_mean_imput(dfs_arg):
 
 
 # K nearest neighbours
-def perf_knn_imput(dfs_arg):
+def perf_knn_imput(dfs_arg, n_neighbors):
     # knn_data = [fancyimpute.KNN(k=100, verbose=True).solve(dfs_arg[i])
-    knn_data = [impy.fast_knn(dfs_arg[i].values, k=10)
+    knn_data = [impy.fast_knn(dfs_arg[i].values, k=n_neighbors)
                 for i in range(len(dfs_arg))]
     return [pd.DataFrame(data=knn_data[i]) for i in range(len(dfs_arg))]
 
@@ -50,15 +50,14 @@ def perf_imputs(dfs_arg):
 
     em_imputed_dfs = perf_em_imput(dfs_arg)
     set_new_headers(em_imputed_dfs)
-    knn_imputed_dfs = perf_knn_imput(dfs_arg)
-    set_new_headers(knn_imputed_dfs)
+    #knn_imputed_dfs = perf_knn_imput(dfs_arg, 10)
+    #set_new_headers(knn_imputed_dfs)
     # mice_imputed_dfs = perf_mice_imput(dfs_arg)
     # set_new_headers(mice_imputed_dfs)
 
     # Create dictionary for all imputed datasets
     imputed_dfs_dict = OrderedDict()
     imputed_dfs_dict['Mean'] = mean_imputed_dfs
-    imputed_dfs_dict['k-NN'] = knn_imputed_dfs
     imputed_dfs_dict['EM'] = em_imputed_dfs
     # imputed_dfs_dict['MICE'] = mice_imputed_dfs
 

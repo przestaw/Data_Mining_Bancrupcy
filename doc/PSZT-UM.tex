@@ -79,34 +79,40 @@
 	\setcounter{tocdepth}{3}
 	\tableofcontents
 	\clearpage
-
-\section{Opis Preprocesingu i Modelowania}
-\subsection{Analiza Zbioru danych}
+\section{Opis zagadnienia}
+\subsection{Treść zadania}
+Przedstawić wyniki analizy zbioru \textsl{Bankruptcy}, opisać procedurę eksperymentalną uczenia maszynowego z wykorzystaniem algorytmów \textsl{random forest} i \textsl{k-najbliższych sąsiadów} oraz opisać wyniki strojenia parametrów powyższych algorytmów.
+\subsection{Narzędzia}
+Skrypty oraz algorytm zostały zaimplementowane w Pythonie 3. Wykorzystano biblioteki: \textsl{imblearn.over\_sampling.SMOTE, sklearn, numpy, matplotlib, scipy.io, impyute}.
+\section{Opis preprocesingu i modelowania}
+\subsection{Opis danych wejściowych}
+Jako dane wejściowe posiadamy 5 plików \textsl{.arff}, z których każdy zawiera ekonomiczne wskaźniki z systemu EMIS na temat polskich firm i ich klasyfikację względem tego, czy firmy zbankrutowały po \textsl{n} latach od roku, w którym zostały zebrane dane. Liczba \textsl{n} lat jest różna dla każdego z plików, od 1 do 5, a każda firma opisana jest przez 64 atrybuty, od \textsl{X1} do \textsl{X64}.
+\subsection{Analiza zbioru danych}
 \subsubsection{Brakujące dane}
 Zaczęliśmy od analizy brakujących danych w wierszach. Jak widać w poniższych wynikach w większości zbiorów około połowa wierszy ma brakujące pola.
 \begin{center}
 \begin{tabular}{|c|m{0.7in}|m{0.7in}|m{0.7in}|m{0.7in}|m{0.7in}|}
 	\hline
-	& \textit{rok 1} & \textit{rok 2} & \textit{rok 3} & \textit{rok 4} & \textit{rok 5} \\ \hline
+	& \textit{1 rok} & \textit{2 lata} & \textit{3 lata} & \textit{4 lata} & \textit{5 lat} \\ \hline
 	\textit{długość} & 7027 & 10173 & 10503 & 9792 & 5910 \\ \hline
 	\textit{pełne wiersze} & 3194 & 4088 & 4885 & 4769 & 3031 \\ \hline
-	\textit{brakujące dane} & 3833 & 6085 & 5618 & 5023 & 2879 \\ \hline
+	\textit{wiersze wybrakowane} & 3833 & 6085 & 5618 & 5023 & 2879 \\ \hline
 \end{tabular}
 \end{center}
 Następnie przeprowadziliśmy analizę rozkładu brakujących danych w kolumnach i wierszach korzystając z biblioteki pythona \textit{missingno} [fig 1-5]\\
 
 \begin{figure}[h]
-\caption{rok 1}
+\caption{1 rok}
 	\includegraphics[width=\textwidth]{year_1}
-\caption{rok 2}
-	\includegraphics[width=\textwidth]{year_2}
-\caption{rok 3}
-	\includegraphics[width=\textwidth]{year_3}
 \end{figure}
-\begin{figure}[h]
-\caption{rok 4}
+\begin{figure}[p]
+\caption{2 lata}
+	\includegraphics[width=\textwidth]{year_2}
+\caption{3 lata}
+	\includegraphics[width=\textwidth]{year_3}
+\caption{4 lata}
 	\includegraphics[width=\textwidth]{year_4}
-\caption{rok 5}
+\caption{5 lat}
 	\includegraphics[width=\textwidth]{year_5}
 \end{figure}
 
