@@ -93,35 +93,25 @@ Zaczęliśmy od analizy brakujących danych w wierszach. Jak widać w poniższyc
 	\textit{brakujące dane} & 3833 & 6085 & 5618 & 5023 & 2879 \\ \hline
 \end{tabular}
 \end{center}
-Następnie przeprowadziliśmy analizę rozkładu brakujących danych w kolumnach i wierszach korzystając z biblioteki pythona \textit{missingno}\\
+Następnie przeprowadziliśmy analizę rozkładu brakujących danych w kolumnach i wierszach korzystając z biblioteki pythona \textit{missingno} [fig 1-5]\\
 
 \begin{figure}[h]
 \caption{rok 1}
 	\includegraphics[width=\textwidth]{year_1}
-\end{figure}
-
-\begin{figure}[h]
 \caption{rok 2}
 	\includegraphics[width=\textwidth]{year_2}
-\end{figure}
-
-\begin{figure}[h]
 \caption{rok 3}
 	\includegraphics[width=\textwidth]{year_3}
 \end{figure}
-
 \begin{figure}[h]
 \caption{rok 4}
 	\includegraphics[width=\textwidth]{year_4}
-\end{figure}
-
-\begin{figure}[h]
 \caption{rok 5}
 	\includegraphics[width=\textwidth]{year_5}
 \end{figure}
 
 Jak widać większość brakujących danych jest w kolumnie \textit{X37}. Kolumna \textit{X21} ma brakujące w niektórych ale nie wszystkich latach.\\
-Trudno nam było ocenić jaki charakter mają braki w tych danych, czy są skorelowane w wartościami w innych kolumnach czy zupełnie losowe. Aby uniknąć utraty danych dla tych krotek które posiadają wartości w danych kolumnach zdecydowaliśmy się interpolować brakujące dane.\\
+Trudno nam było ocenić jaki charakter mają braki w tych danych, czy są skorelowane w wartościami w innych kolumnach czy zupełnie losowe. Wierszy z brakującymi danymi jest około połowy lub więcej. Aby nie odrzucać tak dużej liczby krotek zdecydowaliśmy się interpolować brakujące dane.\\
 W tym celu wybraliśmy 4 metody:
 \begin{enumerate}
 	\item Wstawianie średniej w danej kolumnie \textit{(Jako punkt odniesienia)}
@@ -135,8 +125,8 @@ Dokonaliśmy analizy ile z poszczególnych rekordów należy do klas klasyfikacy
 	\begin{tabular}{|c|m{0.7in}|m{0.7in}|m{0.7in}|m{0.7in}|m{0.7in}|}
 		\hline
 		\textit{Czy zbankrutowano:}& \textit{rok 1} & \textit{rok 2} & \textit{rok 3} & \textit{rok 4} & \textit{rok 5} \\ \hline
-		\textit{Tak} & 6756 & 9773 & 10008 & 9277 & 5500 \\ \hline
-		\textit{Nie} & 271 & 400 & 495 & 515 & 410 \\ \hline \hline
+		\textit{Nie} & 6756 & 9773 & 10008 & 9277 & 5500 \\ \hline
+		\textit{Tak} & 271 & 400 & 495 & 515 & 410 \\ \hline \hline
 		\textit{procent większości} & 3.857 \% & 3.932 \% & 4.713 \% & 5.259 \% & 6.937 \% \\ \hline
 	\end{tabular}
 \end{center}
@@ -152,10 +142,15 @@ Walidacji modeli planujemy dokonać korzystając K-krotnej walidacji krzyżowej.
 	\end{center}
 \end{figure}
 \section{Modele}
-% 1 zdanie + lista : K-najbliższych somsiadów, las losowy
-% 2 zdanie biblioteka : sklearn
+Zgodnie z poleceniem wykorzystaliśmy algorytmy tworzenia modeli : 
+\begin{itemize}
+	\item Las Losowy \textit{[RF - Random Forrest]}
+	\item K Najbliższych sąsiadów \textit{[KNN - K Nearest Neighbors]}
+\end{itemize}
+Implementacje wymienionych algorytmów pochodzą z biblioteki \textit{sklearn}.
 \subsection{Parametry Modeli}
 % Paramsy i ile tych modeluf
+% tabelka dla RT i KNN
 \section{Wyniki Eksperymentu}    
 \subsection{Wykresy}
 % wykresy jak robiom dobrze imputery
