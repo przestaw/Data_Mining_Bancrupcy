@@ -1,4 +1,6 @@
 from collections import OrderedDict
+from copy import copy
+
 import numpy as np
 # To perform kFold Cross Validation
 from sklearn.model_selection import KFold
@@ -9,19 +11,19 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
-from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
-from sklearn.metrics import roc_curve
-from sklearn.metrics import precision_recall_curve
+from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 
 from oversample import split_dfs_labels
 
+
 class ModelsDict:
     models = OrderedDict()
 
-    def add_rf(self, _n_estimators, _criterion) :
-        cl = RandomForestClassifier(n_estimators=_n_estimators, criterion=_criterion)
+    def add_rf(self, _n_estimators, _criterion, _max_features='auto', _max_depth=None):
+        cl = RandomForestClassifier(n_estimators=_n_estimators, criterion=_criterion, max_features=_max_features,
+                                    max_depth=_max_depth)
         key = 'RF/'+str(_n_estimators)+'/'+_criterion
         self.models[key] = cl
 
@@ -48,8 +50,36 @@ def prepare_kfold_cv_data(k, x, y, verbose=False):
     return x_train, y_train, x_test, y_test
 
 
-# perform data modeling
-def perform_data_modeling(_models_dict, _imputers_, verbose=True, k_folds=5):
+def fit_grid_random_forest(dataframes, verbose=True, k_folds=5):
+    if verbose:
+        print("-" * 120, "\n", "Grid search for hyper-parameters for " + '\033[1m' + "Random Forest" +
+              '\033[0m' + " Classifier, using "+ '\033[1m' + "Mean "+ '\033[0m' + "imputing method:")
+    imputer_results = OrderedDict()
+
+    # grid search
+    prm_grid = [{'n_estimators': [1, 10, 100], 'criterion': ['gini', 'entropy'], 'max_features': ['auto', 'log2', 16],
+                 'max_depth': [10, 100, 1000, None]}]
+    cl = RandomForestClassifier()
+    grid = GridSearchCV(verbose=verbose, estimator=cl, param_grid=prm_grid, n_jobs=-1)
+    # call the split_dfs_labels function to get a list of features and labels for all the dataframes
+    feature_dfs, label_dfs = split_dfs_labels(dataframes)
+
+    # list of classifiers for each year
+    cls = []
+
+    # Iterate over dataframe_list individually
+    for df_index in range(len(dataframes)):
+        if verbose:
+            print('\t\tDataset: ' + '\033[1m' + str(df_index + 1) + ' year' + '\033[0m')
+
+        # Fit the model and
+        grid = grid.fit(feature_dfs[df_index], label_dfs[df_index])
+        cls.append(copy(grid.best_estimator_))
+        print('\t\tBest score: ', grid.best_score_)
+    return cls
+
+
+def fit_custom_models(_models_dict, _imputers_, verbose=True, k_folds=5):
     _models_ = _models_dict.models
     model_results = OrderedDict()
 
@@ -58,6 +88,7 @@ def perform_data_modeling(_models_dict, _imputers_, verbose=True, k_folds=5):
         if verbose:
             print("-" * 120, "\n", "Model: " + '\033[1m' + model_name + '\033[0m' + " Classifier")
         imputer_results = OrderedDict()
+
 
         # Iterate over the different imputed_data mechanisms like : (Mean, k-NN, EM, MICE)
         for imputer_name, dataframes_list in _imputers_.items():
@@ -161,14 +192,25 @@ def plot_results(results, _title):
     plt.show()
 
 
-def prepare_and_do_modeling(df_dict):
+# already found out that Random Forest is way better -> now find the best RF Classifier parameters
+def grid_search_rf(df_dict):
+    best_models = fit_grid_random_forest(df_dict['Mean'], verbose=True, k_folds=5)
+    i = 1
+    for model in best_models:
+        print("Best model for year", i)
+        print(model.get_params())
+        i += 1
+
+
+# generate plots from .doc, proves which technique is more accurate
+def test_knn_vs_rf(df_dict):
     # KNN testing
     # test how many neighbours to consider as nearest
     models = ModelsDict()
     models.add_knn(1, 'uniform', 'kd_tree')
     models.add_knn(10, 'uniform', 'kd_tree')
     models.add_knn(25, 'uniform', 'kd_tree')
-    results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    results = fit_custom_models(models, df_dict, verbose=True, k_folds=5)
     plot_results(results, "Varied number of nearest neighbours")
 
     # check for distance-based weights
@@ -176,16 +218,15 @@ def prepare_and_do_modeling(df_dict):
     models.add_knn(1, 'distance', 'kd_tree')
     models.add_knn(10, 'distance', 'kd_tree')
     models.add_knn(25, 'distance', 'kd_tree')
-    results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    results = fit_custom_models(models, df_dict, verbose=True, k_folds=5)
     plot_results(results, "Varied number of nearest neighbours (distance weight)")
 
     # check which distance gives better results for n_neighbors = 1
     models.models.clear()
     models.add_knn(1, 'uniform', 'kd_tree')
     models.add_knn(1, 'distance', 'kd_tree')
-    results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    results = fit_custom_models(models, df_dict, verbose=True, k_folds=5)
     plot_results(results, "Comparing uniform vs distance neighbour weights")
-
 
     # Random Forest Testing
     # test amount of trees with gini
@@ -193,7 +234,7 @@ def prepare_and_do_modeling(df_dict):
     models.add_rf(1, 'gini')
     models.add_rf(10, 'gini')
     models.add_rf(100, 'gini')
-    results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    results = fit_custom_models(models, df_dict, verbose=True, k_folds=5)
     plot_results(results, "Varied amount of trees [gini]")
 
     # test the same with entropy
@@ -201,13 +242,20 @@ def prepare_and_do_modeling(df_dict):
     models.add_rf(1, 'entropy')
     models.add_rf(10, 'entropy')
     models.add_rf(100, 'entropy')
-    results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    results = fit_custom_models(models, df_dict, verbose=True, k_folds=5)
     plot_results(results, "Varied amount of trees [entropy]")
-    
+
     # entropy vs gini with 100 trees
     models.models.clear()
     models.add_rf(100, 'gini')
     models.add_rf(100, 'entropy')
-    results = perform_data_modeling(models, df_dict, verbose=True, k_folds=5)
+    results = fit_custom_models(models, df_dict, verbose=True, k_folds=5)
     plot_results(results, "entropy vs gini")
-    return None
+
+    # best KNN vs best Random Forest comparison
+    models = ModelsDict()
+    models.add_knn(1, 'distance', 'kd_tree')
+    models.add_rf(100, 'gini')
+    results = fit_custom_models(models, df_dict, verbose=True, k_folds=5)
+    plot_results(results, "best KNN vs best RF")
+

@@ -45,20 +45,23 @@ def set_new_headers(dfs_arg):
         df.columns = cols
 
 
-def perf_imputs(dfs_arg):
-    mean_imputed_dfs = perf_mean_imput(dfs_arg)
-
-    em_imputed_dfs = perf_em_imput(dfs_arg)
-    set_new_headers(em_imputed_dfs)
-    #knn_imputed_dfs = perf_knn_imput(dfs_arg, 10)
-    #set_new_headers(knn_imputed_dfs)
-    # mice_imputed_dfs = perf_mice_imput(dfs_arg)
-    # set_new_headers(mice_imputed_dfs)
-
-    # Create dictionary for all imputed datasets
+def perf_imputs(dfs_arg, mean, em, knn, mice):
     imputed_dfs_dict = OrderedDict()
-    imputed_dfs_dict['Mean'] = mean_imputed_dfs
-    imputed_dfs_dict['EM'] = em_imputed_dfs
-    # imputed_dfs_dict['MICE'] = mice_imputed_dfs
+
+    if mean:
+        mean_imputed_dfs = perf_mean_imput(dfs_arg)
+        imputed_dfs_dict['Mean'] = mean_imputed_dfs
+    if em:
+        em_imputed_dfs = perf_em_imput(dfs_arg)
+        set_new_headers(em_imputed_dfs)
+        imputed_dfs_dict['EM'] = em_imputed_dfs
+    if knn:
+        knn_imputed_dfs = perf_knn_imput(dfs_arg, 10)
+        set_new_headers(knn_imputed_dfs)
+        imputed_dfs_dict['KNN'] = knn_imputed_dfs
+    if mice:
+        mice_imputed_dfs = perf_mice_imput(dfs_arg)
+        set_new_headers(mice_imputed_dfs)
+        imputed_dfs_dict['MICE'] = mice_imputed_dfs
 
     return imputed_dfs_dict

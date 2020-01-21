@@ -6,6 +6,8 @@
 \usepackage[parfill]{parskip}
 \usepackage[T1]{fontenc} 
 
+\usepackage{polski}
+\usepackage{float}
 \usepackage{fixltx2e}
 \usepackage{calc}
 \usepackage[export]{adjustbox} % also loads graphicx
@@ -99,7 +101,7 @@ Zaczęliśmy od analizy brakujących danych w wierszach. Jak widać w poniższyc
 	\textit{wiersze wybrakowane} & 3833 & 6085 & 5618 & 5023 & 2879 \\ \hline
 \end{tabular}
 \end{center}
-Następnie przeprowadziliśmy analizę rozkładu brakujących danych w kolumnach i wierszach korzystając z biblioteki pythona \textit{missingno} [fig 1-5]\\
+Następnie przeprowadziliśmy analizę rozkładu brakujących danych w kolumnach i wierszach korzystając z biblioteki pythona \textit{missingno} [Rys. 1-5]\\
 
 \begin{figure}[h]
 \caption{1 rok}
@@ -155,14 +157,86 @@ Zgodnie z poleceniem wykorzystaliśmy algorytmy tworzenia modeli :
 \end{itemize}
 Implementacje wymienionych algorytmów pochodzą z biblioteki \textit{sklearn}.
 \subsection{Parametry Modeli}
-% Paramsy i ile tych modeluf
-% tabelka dla RT i KNN
-\section{Wyniki Eksperymentu}    
-\subsection{Wykresy}
-% wykresy jak robiom dobrze imputery
-% wykresy jak robiom dobrze modele 
-% wykresy jak robiom dobrze modele w zależności od paramsów
+W początkowej fazie porównywania modeli chcieliśmy zbadać, który klasyfikator (KNN czy Random Forest) daje ogólnie lepsze wyniki. Z tego początku parametry dobierane były ręcznie, tak aby utworzyć zestawienie pokazujące różnice między tymi dwoma klasyfikatorami (Rysunek \ref{knn_vs_rf}) oraz porównać wpływ zmiany niektórych parametrów na rezultat końcowy dopasowywania modeli.
+
+
+
+Później, po ustaleniu, że Random Forest jest znacznie klasyfikatorem dla tego problemu, użyliśmy wyszukiwania na hipersiatce, tak aby program sam znalazł hiperparametry dla tego modelu.
+ 
+\section{Wyniki Eksperymentu}
+\subsection{Porównanie klasyfikatorów}
+Początkowo, sprawdziliśmy jaka ilość sąsiadów w metodzie KNN daje najlepszy model, co zademonstrowane jest na Rys. \ref{knn_varied_n_neighbors}. Zaobserwowaliśmy, że nasz model najlepiej dopasowywał się jeśli za najbliższego sąsiada uznawany był tylko jeden punkt.
+Wynik dopasowania każdego klasyfikatora uzyskiwaliśmy dzięki 5-krotnej walidacji krzyżowej.
+\begin{figure}[H]
+\caption{Porównianie liczby K najbliższych sąsiadów}
+\label{knn_varied_n_neighbors}
+\centering
+\includegraphics[scale=0.8]{knn_varied_n_neighbors}
+\end{figure}
+
+Okazuje się, że klasyfikator Random Forest sprawdza się znacznie lepiej niż najlepszy model klasyfikatora KNN. Porównanie dla tych modeli znajduje się na Rys. \ref{bestknn_vs_bestrf}.
+\begin{figure}[H]
+\caption{Porównianie KSS i RF}
+\label{bestknn_vs_bestrf}
+\centering
+\includegraphics[scale=0.8]{bestknn_vs_bestrf}
+\end{figure}
+\subsection{Metoda interpolowania brakujących danych}
+Na Rys. \ref{why_knn_imput_sucks} możemy zaobserwować różnicę w precyzji modeli, zależnie od typu wstawiania danych - zwykłe wstawianie wartości uśrednianej osiąga wynik lepszy niż metoda uzupełniania danych poprzez wstawianie średniej k najbliższych sąsiadów.
+\begin{figure}[H]
+\caption{Porównianie metod wstawiania danych}
+\label{why_knn_imput_sucks}
+\centering
+\includegraphics[scale=0.8]{why_knn_imput_sucks}
+\end{figure}
+Okazuje się, że metoda Mean jest również lepsza niż EM, co obrazuje Rys. \ref{rf_varied_n_trees_entropy}. Można stąd wnioskować, że wpływ najbardziej wybrakowanych kolumn \textit{X37} i \textit{X21} na potencjalny, przyszły status bankructwa jest znikomy.
+Stąd, do liczenia najlepszych hiperparametrów zastosowaliśmy tylko metodę wstawiania wartości średnich.
+\begin{figure}[H]
+\caption{Porównianie metod wstawiania danych}
+\label{rf_varied_n_trees_entropy}
+\centering
+\includegraphics[scale=0.8]{rf_varied_n_trees_entropy}
+\end{figure}
+\subsection{Parametry dobrane przez hipersiatkę}
+Hiperparametry dobierane były generując dla każdego z pięciu zestawów danych po 72 klasyfikatory (stosując 5-krotną walidację krzyżową było ich w sumie 360) i później wybierając ten, który dawał najlepszy odsetek prawidłowych klasyfikacji na zbiorach testowych.
+
+Zmieniane hiperparametry modelu klasyfikatora to: \textsl{n\_estimators} (ilość drzew decyzyjnych), \textsl{criterion} (sposób na który drzewa podejmują decyzje), \textsl{max\_features} (maksymalna liczbę funkcji do rozważenia podczas szukania podziału), \textsl{max\_depth} (maksymalna głębokość drzewa). Poniżej, w tabeli, jest lista wszystkich testowanych parametrów:
+
+\begin{center}
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		\textit{n\_estimators}& \textit{criterion} & \textit{max\_features} & \textit{max\_depth}\\ \hline
+		1, 10, 100 & "gini", "entropy" & "auto", "log2", 16 & 10, 100, 1000, None \\ \hline
+	\end{tabular}
+\end{center}
+
+Otrzymaliśmy następujące rezultaty dla kolejnych ilości lat:
+
+\begin{center}
+	\begin{tabular}{|c|c|c|c|c|c|}
+		\hline
+		& \textbf{1 rok} & \textbf{2 lata} & \textbf{3 lata} & \textbf{4 lata} & \textbf{5 lat} \\ \hline
+		\textit{n\_estimators} & 100 & 100 & 100 & 100 & 100 \\ \hline
+		\textit{criterion} & entropy & entropy & gini & entropy & entropy \\ \hline
+		\textit{max\_features} & log2 & auto & log2 & 16 & 16 \\ \hline
+		\textit{max\_depth} & 100 & None & None & 100 & 100 \\ \hline
+	\end{tabular}
+\end{center}
+
+Widzimy, że tak twierdzi teoria - za każdym razem została wybrana największa ilość estymatorów, a reszta parametrów wahała się zależnie od analizowanego zbioru danych. 
+
+Efekt działania przeszukiwania hipersiatki - modele o najlepiej dobranych hiperparametrach z podanych zbiorów, są widoczne na Rys. \ref{best_rf}.
+
+Prawdopodobnie uzyskanie lepszego wyniku byłoby możliwe analizując więcej hiperparametrów o większym zakresie dostępnych ustawień, jednak jesteśmy ogranieczeni przez moc obliczeniową naszych urządzeń.
+
+\begin{figure}[H]
+\caption{Precyzja modeli dopasowanych hipersiatką}
+\label{best_rf}
+\centering
+\includegraphics[scale=0.8]{best_rf}
+\end{figure}
 \subsection{Interpretacja}
 % jakiś komentarz do obrazków powyżej jeśli nie bezpośrdenio pod nimi ???
 % wnioski że najlepszy np Las Losowy z tymi paramsami i imputerem Xd
+Możemy zauważyć spadek poprawności klasyfikacji firm wraz z wydłużaniem się okresu prognozowania, co jest dosyć oczywistym faktem, ponieważ przewidywanie przyszłości jest coraz trudniejsze dla coraz bardziej oddalonych w czasie sytuacji. Stąd też większe prawdopodobieństwo, że firma której się powodzi zbankrutuje w okresie 5 lat, niż nagle, po upływie roku.
 \end{document}
