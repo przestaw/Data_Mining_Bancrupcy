@@ -157,7 +157,7 @@ Zgodnie z poleceniem wykorzystaliśmy algorytmy tworzenia modeli :
 \end{itemize}
 Implementacje wymienionych algorytmów pochodzą z biblioteki \textit{sklearn}.
 \subsection{Parametry Modeli}
-W początkowej fazie porównywania modeli chcieliśmy zbadać, który klasyfikator (KNN czy Random Forest) daje ogólnie lepsze wyniki. Z tego początku parametry dobierane były ręcznie, tak aby utworzyć zestawienie pokazujące różnice między tymi dwoma klasyfikatorami (Rysunek \ref{knn_vs_rf}) oraz porównać wpływ zmiany niektórych parametrów na rezultat końcowy dopasowywania modeli.
+W początkowej fazie porównywania modeli chcieliśmy zbadać, który klasyfikator (KNN czy Random Forest) daje ogólnie lepsze wyniki. Z tego początku parametry dobierane były ręcznie, tak aby utworzyć zestawienie pokazujące różnice między tymi dwoma klasyfikatorami (Rysunek \ref{bestknn_vs_bestrf}) oraz porównać wpływ zmiany niektórych parametrów na rezultat końcowy dopasowywania modeli.
 
 
 Później, po ustaleniu, że Random Forest jest znacznie klasyfikatorem dla tego problemu, użyliśmy wyszukiwania na hipersiatce, tak aby program sam znalazł hiperparametry dla tego modelu.
@@ -222,7 +222,7 @@ Otrzymaliśmy następujące rezultaty dla kolejnych ilości lat:
 	\end{tabular}
 \end{center}
 
-Widzimy, że tak twierdzi teoria - za każdym razem została wybrana największa ilość estymatorów, a reszta parametrów wahała się zależnie od analizowanego zbioru danych. 
+Widzimy, że tak, jak twierdzi teoria - za każdym razem została wybrana największa ilość estymatorów, a reszta parametrów wahała się zależnie od analizowanego zbioru danych. 
 
 Efekt działania przeszukiwania hipersiatki - modele o najlepiej dobranych hiperparametrach z podanych zbiorów, są widoczne na Rys. \ref{best_rf}.
 
