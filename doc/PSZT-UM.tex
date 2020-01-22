@@ -125,7 +125,7 @@ W tym celu wybraliśmy 4 metody:
 	\item Wstawianie średniej w danej kolumnie \textit{(Jako punkt odniesienia)}
 	\item K najbliższych krotek
 	\item Spodziewanej Maksymalizacji \textit{(Expected Maximalisation)}
-	\item Algorytm MICE
+%	\item Algorytm MICE
 \end{enumerate}
 \subsubsection{Zbalansowanie danych}
 Dokonaliśmy analizy ile z poszczególnych rekordów należy do klas klasyfikacyjnych
@@ -146,7 +146,7 @@ Walidacji modeli planujemy dokonać korzystając K-krotnej walidacji krzyżowej.
 \begin{figure}[h]
 	\caption{Przepływ Danych}
 	\begin{center}
-		\includegraphics[width=4in]{Dataflow}
+		\includegraphics[width=4in]{Dataflow-no-MICE}
 	\end{center}
 \end{figure}
 \section{Modele}
@@ -158,7 +158,6 @@ Zgodnie z poleceniem wykorzystaliśmy algorytmy tworzenia modeli :
 Implementacje wymienionych algorytmów pochodzą z biblioteki \textit{sklearn}.
 \subsection{Parametry Modeli}
 W początkowej fazie porównywania modeli chcieliśmy zbadać, który klasyfikator (KNN czy Random Forest) daje ogólnie lepsze wyniki. Z tego początku parametry dobierane były ręcznie, tak aby utworzyć zestawienie pokazujące różnice między tymi dwoma klasyfikatorami (Rysunek \ref{knn_vs_rf}) oraz porównać wpływ zmiany niektórych parametrów na rezultat końcowy dopasowywania modeli.
-
 
 
 Później, po ustaleniu, że Random Forest jest znacznie klasyfikatorem dla tego problemu, użyliśmy wyszukiwania na hipersiatce, tak aby program sam znalazł hiperparametry dla tego modelu.
