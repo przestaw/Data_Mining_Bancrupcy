@@ -3,6 +3,7 @@
 ## Authors 
 
 [Przemysław Stawczyk](https://github.com/przestaw)
+
 [Piotr Zmyslony](https://github.com/zmysloony)
 
 ## Description
